@@ -3,7 +3,7 @@ import feedparser
 import requests
 from telegram import Bot
 
-TOKEN = "ВСТАВЬ_СЮДА_ТОКЕН"
+TOKEN = "8519274333:AAHPzbYbjgUA-bStiKlRT8ye4xYZ3jQZfUI"
 CHANNEL = "@uztrade_school"
 
 bot = Bot(token=TOKEN)
