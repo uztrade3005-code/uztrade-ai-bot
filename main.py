@@ -120,7 +120,7 @@ def format_post(title, link):
     signal = analyze(title)
 
     return (
-        "💰 *UZTRADE AI NEWS*\n"
+        "💰 *UZTRADE NEWS*\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
 
         "🇬🇧 *English:*\n"
