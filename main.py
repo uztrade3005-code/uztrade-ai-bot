@@ -2,13 +2,15 @@ import asyncio
 import feedparser
 import json
 import os
+import requests
 from telegram import Bot
 from telegram.error import TelegramError
 
 # ─── CONFIG ───────────────────────────────────────────────
-TOKEN   = "8519274333:AAHPzbYbjgUA-bStiKlRT8ye4xYZ3jQZfUI"   # ← paste new token from @BotFather
-CHANNEL = "@uztrade_school"
-INTERVAL = 1800  # 30 minutes
+TOKEN        = "8519274333:AAHPzbYbjgUA-bStiKlRT8ye4xYZ3jQZfUI"      # ← your Telegram bot token
+CHANNEL      = "@uztrade_school"
+GEMINI_KEY   = "AQ.Ab8RN6IcOjC9tJxKnzSfNViZ7A5mjQVV8J0UGR6ViI6MFClvqw"
+INTERVAL     = 1800  # 30 minutes
 # ──────────────────────────────────────────────────────────
 
 FEEDS = [
@@ -54,18 +56,86 @@ def get_news(posted):
 def analyze(title):
     t = title.lower()
     if any(k in t for k in ["rise","surge","rally","gain","bullish","рост","растёт"]):
-        return "📈 Bullish сигнал — возможен рост"
+        return {
+            "en": "📈 Bullish signal — possible growth",
+            "ru": "📈 Бычий сигнал — возможен рост",
+            "uz": "📈 O'sish signali — narx ko'tarilishi mumkin",
+        }
     if any(k in t for k in ["fall","drop","crash","decline","bearish","падение","снижение"]):
-        return "📉 Bearish сигнал — возможно снижение"
-    return "🔍 Наблюдаем за реакцией рынка"
+        return {
+            "en": "📉 Bearish signal — possible decline",
+            "ru": "📉 Медвежий сигнал — возможно снижение",
+            "uz": "📉 Tushish signali — narx pasayishi mumkin",
+        }
+    return {
+        "en": "🔍 Watching market reaction",
+        "ru": "🔍 Наблюдаем за реакцией рынка",
+        "uz": "🔍 Bozor reaktsiyasini kuzatmoqdamiz",
+    }
+
+
+def translate_title(title):
+    """Translate title to Russian and Uzbek using Gemini API."""
+    try:
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"gemini-2.0-flash:generateContent?key={GEMINI_KEY}"
+        )
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": (
+                        f"Translate this financial news headline into Russian and Uzbek.\n"
+                        f"Headline: {title}\n\n"
+                        f"Respond ONLY in this exact format, no extra text:\n"
+                        f"RU: <russian translation>\n"
+                        f"UZ: <uzbek translation>"
+                    )
+                }]
+            }]
+        }
+        resp = requests.post(url, json=payload, timeout=10)
+        resp.raise_for_status()
+
+        text = resp.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+        print(f"🌐 Translation raw: {text}")
+
+        lines = {}
+        for line in text.splitlines():
+            if ":" in line:
+                key, _, val = line.partition(":")
+                lines[key.strip()] = val.strip()
+
+        ru = lines.get("RU", title)
+        uz = lines.get("UZ", title)
+        return ru, uz
+
+    except Exception as e:
+        print(f"❌ Translation error: {e}")
+        return title, title  # fallback to original
 
 
 def format_post(title, link):
+    ru_title, uz_title = translate_title(title)
+    signal = analyze(title)
+
     return (
-        "💰 *UZTRADE AI NEWS*\n\n"
-        f"📰 {title}\n\n"
-        f"📊 *AI Анализ:* {analyze(title)}\n\n"
-        f"📎 [Читать полностью]({link})\n\n"
+        "💰 *UZTRADE AI NEWS*\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+
+        "🇬🇧 *English:*\n"
+        f"📰 {title}\n"
+        f"📊 {signal['en']}\n\n"
+
+        "🇷🇺 *Русский:*\n"
+        f"📰 {ru_title}\n"
+        f"📊 {signal['ru']}\n\n"
+
+        "🇺🇿 *O'zbek:*\n"
+        f"📰 {uz_title}\n"
+        f"📊 {signal['uz']}\n\n"
+
+        "━━━━━━━━━━━━━━━━━━━━\n"
         "#Forex #Gold #UZTRADE"
     )
 
