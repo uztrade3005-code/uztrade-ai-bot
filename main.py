@@ -6,7 +6,7 @@ from telegram import Bot
 from telegram.error import TelegramError
 
 # ─── CONFIG ───────────────────────────────────────────────
-TOKEN   = "YOUR_NEW_TOKEN_HERE"   # ← paste new token from @BotFather
+TOKEN   = "8519274333:AAHPzbYbjgUA-bStiKlRT8ye4xYZ3jQZfUI"   # ← paste new token from @BotFather
 CHANNEL = "@uztrade_school"
 INTERVAL = 1800  # 30 minutes
 # ──────────────────────────────────────────────────────────
