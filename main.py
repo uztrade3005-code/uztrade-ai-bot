@@ -911,24 +911,25 @@ async def contact_handler(
     # ========================================================
 
     await update.message.reply_text(
+    "🎉 Tabriklaymiz!\n\n"
+    "Siz UZTRADE SCHOOL bepul master-klassiga "
+    "muvaffaqiyatli ro‘yxatdan o‘tdingiz! ✅\n\n"
+    "Master-klass vaqti va barcha kerakli "
+    "ma'lumotlar sizga Telegram orqali yuboriladi. 📩"
+)
 
-        "🎉 Tabriklaymiz!\n\n"
-
-        "Siz UZTRADE SCHOOL bepul "
-        "master-klassiga muvaffaqiyatli "
-        "ro‘yxatdan o‘tdingiz! ✅\n\n"
-
-        "Master-klass vaqti hamda barcha "
-        "kerakli ma'lumotlar sizga "
-        "Telegram orqali yuboriladi. 📩\n\n"
-
-        "📢 Master-klass va foydali "
-        "ma'lumotlarni o‘tkazib yubormaslik "
-        "uchun kanalimizga qo‘shiling 👇",
-
-        reply_markup=registration_success_keyboard()
-
-    )
+await update.message.reply_text(
+    "📢 Master-klass va foydali ma'lumotlarni "
+    "o‘tkazib yubormaslik uchun kanalimizga qo‘shiling 👇",
+    reply_markup=InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "📢 UZTRADE SCHOOL kanaliga qo‘shilish",
+                url="https://t.me/uztrade_school"
+            )
+        ]
+    ])
+)
 
 
 # ============================================================
