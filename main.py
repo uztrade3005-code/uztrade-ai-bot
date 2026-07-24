@@ -1,4 +1,4 @@
-(import os
+import os
 import sqlite3
 import logging
 import asyncio
@@ -28,21 +28,14 @@ from telegram.ext import (
 # ============================================================
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-ADMIN_ID = int(
-    os.getenv("ADMIN_ID", "0")
-)
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
 DB_FILE = os.getenv(
     "DB_FILE",
     "uztrade_users.db"
 )
 
-# Telegram канал
 CHANNEL_URL = "https://t.me/uztrade_school"
-
-# Оператор
-OPERATOR_USERNAME = "@uztrade_support"
 
 OPERATOR_URL = "https://t.me/uztrade_support"
 
@@ -91,9 +84,7 @@ def init_database():
     conn.commit()
     conn.close()
 
-    logger.info(
-        "UZTRADE database initialized"
-    )
+    logger.info("Database initialized")
 
 
 # ============================================================
@@ -140,107 +131,48 @@ def save_user(user):
 
 
 # ============================================================
-# СОХРАНЕНИЕ ИМЕНИ
+# ОБНОВЛЕНИЕ ДАННЫХ
 # ============================================================
 
-def save_name(
+def update_user_field(
     telegram_id,
-    name
+    field,
+    value
 ):
+
+    allowed_fields = [
+        "name",
+        "age",
+        "city",
+        "phone"
+    ]
+
+    if field not in allowed_fields:
+        return
 
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = f"""
         UPDATE users
-        SET name = ?
+        SET {field} = ?
         WHERE telegram_id = ?
-    """, (
-        name,
-        telegram_id
-    ))
+    """
+
+    cursor.execute(
+        query,
+        (
+            value,
+            telegram_id
+        )
+    )
 
     conn.commit()
     conn.close()
 
 
 # ============================================================
-# СОХРАНЕНИЕ ВОЗРАСТА
-# ============================================================
-
-def save_age(
-    telegram_id,
-    age
-):
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE users
-        SET age = ?
-        WHERE telegram_id = ?
-    """, (
-        age,
-        telegram_id
-    ))
-
-    conn.commit()
-    conn.close()
-
-
-# ============================================================
-# СОХРАНЕНИЕ ГОРОДА
-# ============================================================
-
-def save_city(
-    telegram_id,
-    city
-):
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE users
-        SET city = ?
-        WHERE telegram_id = ?
-    """, (
-        city,
-        telegram_id
-    ))
-
-    conn.commit()
-    conn.close()
-
-
-# ============================================================
-# СОХРАНЕНИЕ ТЕЛЕФОНА
-# ============================================================
-
-def save_phone(
-    telegram_id,
-    phone
-):
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE users
-        SET phone = ?
-        WHERE telegram_id = ?
-    """, (
-        phone,
-        telegram_id
-    ))
-
-    conn.commit()
-    conn.close()
-
-
-# ============================================================
-# ПОЛУЧЕНИЕ АКТИВНЫХ ПОЛЬЗОВАТЕЛЕЙ
+# АКТИВНЫЕ ПОЛЬЗОВАТЕЛИ
 # ============================================================
 
 def get_active_users():
@@ -273,10 +205,9 @@ def get_user_stats():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM users
-    """)
+    cursor.execute(
+        "SELECT COUNT(*) FROM users"
+    )
 
     total = cursor.fetchone()[0]
 
@@ -302,12 +233,10 @@ def get_user_stats():
 
 
 # ============================================================
-# ПОМЕТИТЬ ЗАБЛОКИРОВАВШЕГО ПОЛЬЗОВАТЕЛЯ
+# ЗАБЛОКИРОВАННЫЙ ПОЛЬЗОВАТЕЛЬ
 # ============================================================
 
-def mark_blocked(
-    telegram_id
-):
+def mark_blocked(telegram_id):
 
     conn = get_db()
     cursor = conn.cursor()
@@ -428,7 +357,7 @@ def registration_success_keyboard():
 
 
 # ============================================================
-# КНОПКА ОПЕРАТОРА ДЛЯ РАССЫЛКИ
+# КНОПКА ДЛЯ РАССЫЛКИ
 # ============================================================
 
 def broadcast_keyboard():
@@ -450,7 +379,7 @@ def broadcast_keyboard():
 
 
 # ============================================================
-# /START
+# START
 # ============================================================
 
 async def start(
@@ -484,7 +413,7 @@ async def start(
 
 
 # ============================================================
-# НАЧАЛО РЕГИСТРАЦИИ
+# РЕГИСТРАЦИЯ
 # ============================================================
 
 async def start_registration(
@@ -538,7 +467,7 @@ async def operator(
 
 
 # ============================================================
-# ОБРАБОТКА ТЕКСТОВЫХ СООБЩЕНИЙ
+# ОБРАБОТКА ТЕКСТА
 # ============================================================
 
 async def message_handler(
@@ -552,7 +481,7 @@ async def message_handler(
 
 
     # ========================================================
-    # ГЛАВНОЕ МЕНЮ
+    # МЕНЮ
     # ========================================================
 
     if text == "📝 Ro‘yxatdan o‘tish":
@@ -593,8 +522,6 @@ async def message_handler(
 
         users = get_active_users()
 
-        count = len(users)
-
         keyboard = [
 
             [
@@ -615,13 +542,13 @@ async def message_handler(
 
         await update.message.reply_text(
 
-            "📢 PREVIEW РАССЫЛКИ\n\n"
+            "📢 PREVIEW RASSYLKA\n\n"
 
             f"{text}\n\n"
 
             "━━━━━━━━━━━━━━\n"
 
-            f"👥 Получателей: {count}\n\n"
+            f"👥 Получателей: {len(users)}\n\n"
 
             "Отправить сообщение всем?",
 
@@ -657,8 +584,9 @@ async def message_handler(
                 "name"
             ] = text
 
-            save_name(
+            update_user_field(
                 user.id,
+                "name",
                 text
             )
 
@@ -685,8 +613,9 @@ async def message_handler(
                 "age"
             ] = text
 
-            save_age(
+            update_user_field(
                 user.id,
+                "age",
                 text
             )
 
@@ -704,7 +633,7 @@ async def message_handler(
 
 
         # ====================================================
-        # ГОРОД / РАЙОН
+        # ГОРОД
         # ====================================================
 
         if step == "city":
@@ -713,8 +642,9 @@ async def message_handler(
                 "city"
             ] = text
 
-            save_city(
+            update_user_field(
                 user.id,
+                "city",
                 text
             )
 
@@ -750,7 +680,7 @@ async def message_handler(
 
 
 # ============================================================
-# ОБРАБОТКА ТЕЛЕФОНА
+# ТЕЛЕФОН
 # ============================================================
 
 async def contact_handler(
@@ -764,7 +694,7 @@ async def contact_handler(
 
 
     # ========================================================
-    # ПРОВЕРКА ВЛАДЕЛЬЦА НОМЕРА
+    # ПРОВЕРКА НОМЕРА
     # ========================================================
 
     if contact.user_id != user.id:
@@ -810,23 +740,20 @@ async def contact_handler(
 
 
     # ========================================================
-    # ПОЛУЧАЕМ ТЕЛЕФОН
+    # СОХРАНЯЕМ ТЕЛЕФОН
     # ========================================================
 
     phone = contact.phone_number
 
-    save_phone(
+    update_user_field(
         user.id,
+        "phone",
         phone
     )
 
-    context.user_data[
-        "phone"
-    ] = phone
-
 
     # ========================================================
-    # ПОЛУЧАЕМ ВСЕ ДАННЫЕ
+    # ПОЛУЧАЕМ ДАННЫЕ
     # ========================================================
 
     name = context.user_data.get(
@@ -856,7 +783,7 @@ async def contact_handler(
 
 
     # ========================================================
-    # УВЕДОМЛЕНИЕ АДМИНИСТРАТОРУ
+    # АДМИНУ
     # ========================================================
 
     admin_message = (
@@ -893,9 +820,7 @@ async def contact_handler(
     except Exception as error:
 
         logger.error(
-
             f"Admin notification error: {error}"
-
         )
 
 
@@ -911,50 +836,28 @@ async def contact_handler(
     # ========================================================
 
     await update.message.reply_text(
-    "🎉 Tabriklaymiz!\n\n"
-    "Siz UZTRADE SCHOOL bepul "
-    "master-klassiga muvaffaqiyatli "
-    "ro‘yxatdan o‘tdingiz! ✅\n\n"
-    "Master-klass vaqti hamda barcha "
-    "kerakli ma'lumotlar sizga "
-    "Telegram orqali yuboriladi. 📩\n\n"
-    "📢 Master-klass va foydali "
-    "ma'lumotlarni o‘tkazib yubormaslik "
-    "uchun kanalimizga qo‘shiling 👇",
-    
-    reply_markup=InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton(
-                "📢 UZTRADE SCHOOL kanaliga qo‘shilish",
-                url="https://t.me/uztrade_school"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "👨‍💼 Operator bilan bog‘lanish",
-                url="https://t.me/uztrade_support"
-            )
-        ]
-    ])
-)
-)
 
-await update.message.reply_text(
-    "📢 Master-klass va foydali ma'lumotlarni "
-    "o‘tkazib yubormaslik uchun kanalimizga qo‘shiling 👇",
-    reply_markup=InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton(
-                "📢 UZTRADE SCHOOL kanaliga qo‘shilish",
-                url="https://t.me/uztrade_school"
-            )
-        ]
-    ])
-)
+        "🎉 Tabriklaymiz!\n\n"
+
+        "Siz UZTRADE SCHOOL bepul "
+        "master-klassiga muvaffaqiyatli "
+        "ro‘yxatdan o‘tdingiz! ✅\n\n"
+
+        "Master-klass vaqti hamda barcha "
+        "kerakli ma'lumotlar sizga "
+        "Telegram orqali yuboriladi. 📩\n\n"
+
+        "📢 Master-klass va foydali "
+        "ma'lumotlarni o‘tkazib yubormaslik "
+        "uchun kanalimizga qo‘shiling 👇",
+
+        reply_markup=registration_success_keyboard()
+
+    )
 
 
 # ============================================================
-# /BROADCAST
+# BROADCAST
 # ============================================================
 
 async def broadcast(
@@ -964,13 +867,10 @@ async def broadcast(
 
     user = update.effective_user
 
-
     if user.id != ADMIN_ID:
 
         await update.message.reply_text(
-
             "❌ Sizda ruxsat yo‘q."
-
         )
 
         return
@@ -993,7 +893,7 @@ async def broadcast(
 
 
 # ============================================================
-# /CANCEL
+# CANCEL
 # ============================================================
 
 async def cancel(
@@ -1003,22 +903,25 @@ async def cancel(
 
     user = update.effective_user
 
+    if user.id != ADMIN_ID:
 
-    if user.id == ADMIN_ID:
+        return
 
-        context.user_data.clear()
 
-        await update.message.reply_text(
+    context.user_data.clear()
 
-            "❌ Rassylka bekor qilindi.",
 
-            reply_markup=main_keyboard()
+    await update.message.reply_text(
 
-        )
+        "❌ Rassylka bekor qilindi.",
+
+        reply_markup=main_keyboard()
+
+    )
 
 
 # ============================================================
-# /USERS
+# USERS
 # ============================================================
 
 async def users_command(
@@ -1027,7 +930,6 @@ async def users_command(
 ):
 
     user = update.effective_user
-
 
     if user.id != ADMIN_ID:
 
@@ -1053,7 +955,7 @@ async def users_command(
 
 
 # ============================================================
-# CALLBACK-КНОПКИ
+# CALLBACK
 # ============================================================
 
 async def callback_handler(
@@ -1095,11 +997,8 @@ async def callback_handler(
 
         users = get_active_users()
 
-
         success = 0
-
         failed = 0
-
         blocked = 0
 
 
@@ -1128,7 +1027,6 @@ async def callback_handler(
 
                 success += 1
 
-
                 await asyncio.sleep(
                     0.05
                 )
@@ -1137,7 +1035,6 @@ async def callback_handler(
             except Exception as error:
 
                 failed += 1
-
 
                 error_text = str(
                     error
@@ -1202,7 +1099,7 @@ async def callback_handler(
 
 
     # ========================================================
-    # ОТМЕНА РАССЫЛКИ
+    # ОТМЕНА
     # ========================================================
 
     if query.data == "cancel_broadcast":
@@ -1218,10 +1115,32 @@ async def callback_handler(
 
 
 # ============================================================
+# ERROR HANDLER
+# ============================================================
+
+async def error_handler(
+    update: object,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    logger.error(
+
+        "Exception while handling update:",
+
+        exc_info=context.error
+
+    )
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
 def main():
+
+    # ========================================================
+    # ПРОВЕРКА ПЕРЕМЕННЫХ
+    # ========================================================
 
     if not BOT_TOKEN:
 
@@ -1244,14 +1163,14 @@ def main():
 
 
     # ========================================================
-    # ИНИЦИАЛИЗАЦИЯ БАЗЫ
+    # DATABASE
     # ========================================================
 
     init_database()
 
 
     # ========================================================
-    # СОЗДАНИЕ ПРИЛОЖЕНИЯ
+    # APPLICATION
     # ========================================================
 
     application = (
@@ -1266,7 +1185,16 @@ def main():
 
 
     # ========================================================
-    # КОМАНДЫ
+    # ERROR HANDLER
+    # ========================================================
+
+    application.add_error_handler(
+        error_handler
+    )
+
+
+    # ========================================================
+    # COMMANDS
     # ========================================================
 
     application.add_handler(
@@ -1310,7 +1238,7 @@ def main():
 
 
     # ========================================================
-    # ТЕЛЕФОН
+    # CONTACT
     # ========================================================
 
     application.add_handler(
@@ -1327,7 +1255,7 @@ def main():
 
 
     # ========================================================
-    # INLINE-КНОПКИ
+    # CALLBACK
     # ========================================================
 
     application.add_handler(
@@ -1342,7 +1270,7 @@ def main():
 
 
     # ========================================================
-    # ТЕКСТ
+    # TEXT
     # ========================================================
 
     application.add_handler(
@@ -1365,7 +1293,7 @@ def main():
 
 
     # ========================================================
-    # ЗАПУСК БОТА
+    # RUN
     # ========================================================
 
     application.run_polling()
