@@ -22,8 +22,8 @@ from telegram.ext import (
 # ============================================================
 # НАСТРОЙКИ
 # ============================================================
-BOT_TOKEN = os.getenv("8993152771:AAFWxb-VdsM3xPrH00BHOc-1-j-ozbAlh_w")
-ADMIN_ID = int(os.getenv("7962666075", "0"))
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 DB_FILE = os.getenv("DB_FILE", "uztrade_users.db")
 OPERATOR_USERNAME = "@uztrade_support"
 OPERATOR_URL = "https://t.me/uztrade_support"
