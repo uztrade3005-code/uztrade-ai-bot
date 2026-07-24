@@ -359,25 +359,22 @@ def operator_keyboard():
 # ПОСЛЕ РЕГИСТРАЦИИ
 # ============================================================
 
-def registration_success_keyboard():
+await update.message.reply_text(
 
-    keyboard = [
+    "🎉 Tabriklaymiz!\n\n"
 
-        [
-            InlineKeyboardButton(
-                "📢 UZTRADE SCHOOL kanaliga qo‘shilish",
-                url=CHANNEL_URL
-            )
-        ],
+    "Siz UZTRADE SCHOOL bepul "
+    "master-klassiga muvaffaqiyatli "
+    "ro‘yxatdan o‘tdingiz! ✅\n\n"
 
-        [
-            InlineKeyboardButton(
-                "👨‍💼 Operator bilan bog‘lanish",
-                url=OPERATOR_URL
-            )
-        ]
+    "📢 Master-klass shu Telegram kanalida bo‘ladi.\n\n"
 
-    ]
+    "Master-klassni o‘tkazib yubormaslik uchun "
+    "kanalimizga qo‘shiling 👇",
+
+    reply_markup=registration_success_keyboard()
+
+)
 
     return InlineKeyboardMarkup(keyboard)
 
@@ -834,23 +831,20 @@ async def contact_handler(
 
     await update.message.reply_text(
 
-        "🎉 Tabriklaymiz!\n\n"
+    "🎉 Tabriklaymiz!\n\n"
 
-        "Siz UZTRADE SCHOOL bepul "
-        "master-klassiga muvaffaqiyatli "
-        "ro‘yxatdan o‘tdingiz! ✅\n\n"
+    "Siz UZTRADE SCHOOL bepul "
+    "master-klassiga muvaffaqiyatli "
+    "ro‘yxatdan o‘tdingiz! ✅\n\n"
 
-        "Master-klass vaqti hamda barcha "
-        "kerakli ma'lumotlar sizga "
-        "Telegram orqali yuboriladi. 📩\n\n"
+    "📢 Master-klass shu Telegram kanalida bo‘ladi.\n\n"
 
-        "📢 Master-klass va foydali "
-        "ma'lumotlarni o‘tkazib yubormaslik "
-        "uchun kanalimizga qo‘shiling 👇",
+    "Master-klassni o‘tkazib yubormaslik uchun "
+    "kanalimizga qo‘shiling 👇",
 
-        reply_markup=registration_success_keyboard()
+    reply_markup=registration_success_keyboard()
 
-    )
+)
 
 
 # ============================================================
